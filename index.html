@@ -1,0 +1,865 @@
+<html><head><base href="https://cybersim.net/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hacker Simulator By: Fabio Maran</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background-color: #000;
+    color: #0f0;
+    height: 100%;
+    overflow: hidden;
+  }
+  #terminal {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: #0f0 #000;
+  }
+  #ascii-logo {
+    font-family: monospace;
+    white-space: pre;
+    line-height: 1;
+    color: #0f0;
+    margin-bottom: 15px;
+    font-size: 0.8em;
+  }
+  .prompt {
+    display: flex;
+    align-items: center;
+  }
+  .cursor {
+    width: 8px;
+    height: 16px;
+    background-color: #0f0;
+    display: inline-block;
+    animation: blink 0.7s infinite;
+  }
+  @keyframes blink {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  #typed-text {
+    margin-right: 4px;
+  }
+  #input {
+    position: absolute;
+    left: -9999px;
+    background-color: transparent;
+    border: none;
+    color: #0f0;
+    font-family: inherit;
+    font-size: 1em;
+    outline: none;
+    width: 100%;
+  }
+  .response {
+    margin-bottom: 10px;
+  }
+  .loading::after {
+    content: "|";
+    animation: blink 0.7s infinite;
+  }
+  .command-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+    columns: 1;
+    -webkit-columns: 1;
+    -moz-columns: 1;
+  }
+  .command-list li {
+    margin-bottom: 10px;
+    break-inside: avoid-column;
+  }
+  .command-name {
+    font-weight: bold;
+    color: #0ff;
+  }
+  #terminal::-webkit-scrollbar {
+    width: 8px;
+  }
+  #terminal::-webkit-scrollbar-track {
+    background: #000;
+  }
+  #terminal::-webkit-scrollbar-thumb {
+    background-color: #0f0;
+    border-radius: 4px;
+  }
+  #thank-you-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+  #thank-you-screen h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+  #thank-you-screen p {
+    font-size: 1.2em;
+    text-align: center;
+    max-width: 80%;
+    line-height: 1.5;
+   }
+
+</style>
+</head>
+<body>
+<div id="terminal">
+  <pre id="ascii-logo"><strong>
+ _   _            _             
+| | | | __ _  ___| | _____ _ __ 
+| |_| |/ _` |/ __| |/ / _ \ '__|
+|  _  | (_| | (__|   <  __/ |   
+|_| |_|\__,_|\___|_|\_\___|_|   
+  _____ _                _       _             
+ / ____(_)              | |     | |            
+| (___  _ _ __ ___  _  _| | __ _| |_ ___  _ __ 
+ \___ \| | '_ ` _ \| || | |/ _` | __/ _ \| '__|
+ ____) | | | | | | | || | | (_| | || (_) | |   
+|_____/|_|_| |_| |_|\__/|_|\__,_|\__\___/|_|  
+
+<font color="#FF0000">By: Fabio Maran</font></strong> 
+  </pre>
+  <div class="response">Bem-vindo ao Hacker Simulator, um simulador de comandos Hacker</div>
+  <div class="response">Caso queira uma experiência ainda maior, pressione <strong>F11</strong> do seu teclado</div>
+  <div class="response">Digite <font color="#FF0000">"ajuda"</font> para ver a lista completa de comandos disponíveis.</div>
+  <div class="prompt">
+    <span class="cursor"></span>
+    <span id="typed-text"></span>
+    <input id="input" type="text" autofocus>
+  </div>
+</div>
+
+<script>
+const terminal = document.getElementById('terminal');
+const input = document.getElementById('input');
+const typedText = document.getElementById('typed-text');
+const cursor = document.querySelector('.cursor');
+
+function simulateCommand(message, duration) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(message);
+    }, duration);
+  });
+}
+
+function createAsciiLogo() {
+  const asciiLogo = document.createElement('pre');
+  asciiLogo.id = 'ascii-logo';
+  asciiLogo.textContent = `
+
+  `;
+  return asciiLogo;
+}
+
+const commands = {
+  aircrack_ng: function() {
+    return simulateCommand(`Aircrack-ng v1.6.git`, 3000);
+  },
+  airgeddon: function() {
+    return simulateCommand(`airgeddon v10.40 - Wireless security auditing script initialized...`, 3500);
+  },
+  auto_hacker: function() {
+    return "Iniciando Auto Hacker...";
+  },
+  beef: function() {
+    return simulateCommand(`BeEF 0.4.9`, 3000);
+  },
+  burpsuite: function() {
+    return simulateCommand(`Burp Suite Community Edition`, 3000);
+  },
+  cat: function() {
+    return simulateCommand(`
+This is the content of the file you requested.
+It could contain sensitive information.
+Be careful with what you read!
+    `, 2000);
+  },
+  cd: function() {
+    return simulateCommand(`Changed directory.`, 1000);
+  },
+  cewl: function() {
+    return simulateCommand(`CeWL 5.5.2 - Creating custom wordlist from target website...`, 3500);
+  },
+  chmod: function() {
+    return simulateCommand(`Changed file permissions.`, 1500);
+  },
+  chown: function() {
+    return simulateCommand(`Changed file ownership.`, 1500);
+  },
+  cp: function() {
+    return simulateCommand(`File copied.`, 1000);
+  },
+  crackmapexec: function() {
+    return simulateCommand(`CrackMapExec 5.1.4 - Network attack tool ready...`, 3000);
+  },
+  crunch: function() {
+    return simulateCommand(`Crunch 3.6 - Generating wordlist with specified parameters...`, 3000);
+  },
+  date: function() {
+    return simulateCommand(new Date().toString(), 500);
+  },
+  df: function() {
+    return simulateCommand(`
+Filesystem     1K-blocks      Used Available Use% Mounted on
+/dev/sda1      103081248  83736236  14110624  86% /
+/dev/sdb1      976762584 304542144 623009240  33% /mnt/data
+    `, 2000);
+  },
+  dirb: function() {
+    return simulateCommand(`DIRB v2.22 by The Dark Raver`, 3000);
+  },
+  dmitry: function() {
+    return simulateCommand(`DMitry 1.3a - Deepmagic Information Gathering Tool starting...`, 3000);
+  },
+  dnsenum: function() {
+    return simulateCommand(`DNSenum 1.2.6 - Enumerating DNS information of target domain...`, 4000);
+  },
+  dnsrecon: function() {
+    return simulateCommand(`DNSRecon 0.10.0 - Enumerating DNS records...`, 3500);
+  },
+  echo: function() {
+    return simulateCommand(`Hello, World!`, 500);
+  },
+  enum4linux: function() {
+    return simulateCommand(`enum4linux v0.9.1 - Enumerating Windows and Samba information...`, 3500);
+  },
+  ettercap: function() {
+    return simulateCommand(`Ettercap v0.7.4`, 3000);
+  },
+  fierce: function() {
+    return simulateCommand(`Fierce 1.4.0 - Scanning domain for DNS servers and zone transfers...`, 3500);
+  },
+  find: function() {
+    return simulateCommand(`
+./file1.txt
+./Documents/file2.txt
+./Downloads/file3.txt
+    `, 2000);
+  },
+  free: function() {
+    return simulateCommand(`
+              total        used        free      shared  buff/cache   available
+Mem:       16303528     4521304     7639708      861588     4142516    10571640
+Swap:       2097152           0     2097152
+    `, 1500);
+  },
+  gobuster: function() {
+    return simulateCommand(`Gobuster v3.1.0`, 3000);
+  },
+  grep: function() {
+    return simulateCommand(`
+file1.txt:This line contains the search term
+file2.txt:Another match in this file
+file3.txt:Yet another line with the term
+    `, 2500);
+  },
+  hashcat: function() {
+    return simulateCommand(`hashcat (v6.1.1) starting in attack mode 0 (straight)`, 3000);
+  },
+  hping3: function() {
+    return simulateCommand(`hping3 3.0.0-alpha-2 - TCP/IP packet assembler/analyzer ready...`, 3000);
+  },
+  hydra: function() {
+    return simulateCommand(`
+Hydra v9.1 (c) 2020 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2023-05-10 15:45:23
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344399 login tries (l:1/p:14344399), ~896525 tries per task
+[DATA] attacking ssh://10.0.0.1:22/
+[22][ssh] host: 10.0.0.1   login: admin   password: password123
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2023-05-10 15:48:43
+    `, 8000);
+  },
+  ifconfig: function() {
+    return simulateCommand(`
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.100  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::215:5dff:fe00:0  prefixlen 64  scopeid 0x20<link>
+        ether 00:15:5d:00:00:00  txqueuelen 1000  (Ethernet)
+        RX packets 8746  bytes 6690886 (6.3 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 4678  bytes 421780 (411.8 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 12  bytes 636 (636.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 12  bytes 636 (636.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+    `, 3000);
+  },
+  iptables: function() {
+    return simulateCommand(`
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:ssh
+DROP       all  --  10.0.0.0/8           anywhere            
+    `, 2000);
+  },
+  john: function() {
+    return simulateCommand(`John the Ripper v1.9.0`, 3000);
+  },
+  kismet: function() {
+    return simulateCommand(`Kismet 2020-12-R3 - Detecting and sniffing wireless networks...`, 3000);
+  },
+  legion: function() {
+    return simulateCommand(`Legion 0.3.6 - Semi-automated network penetration testing framework...`, 3500);
+  },
+  ls: function() {
+    return simulateCommand(`
+Documents  Downloads  Music  Pictures  Public  Templates  Videos
+    `, 2000);
+  },
+  lynis: function() {
+    return simulateCommand(`Lynis 3.0.5 - Security auditing tool for Unix/Linux systems starting...`, 3500);
+  },
+  maltego: function() {
+    return simulateCommand(`Maltego CE v4.2.19 - Mapping target relationships...`, 4000);
+  },
+  masscan: function() {
+    return simulateCommand(`masscan 1.3.2 - TCP port scanner, initiating scan...`, 3000);
+  },
+  medusa: function() {
+    return simulateCommand(`Medusa 2.2 - Parallel network login auditor initialized...`, 3000);
+  },
+  metasploit: function() {
+    return simulateCommand(`
+msf6 > use exploit/multi/handler
+[*] Using configured payload generic/shell_reverse_tcp
+msf6 exploit(multi/handler) > set PAYLOAD windows/meterpreter/reverse_tcp
+PAYLOAD => windows/meterpreter/reverse_tcp
+msf6 exploit(multi/handler) > set LHOST 192.168.1.100
+LHOST => 192.168.1.100
+msf6 exploit(multi/handler) > set LPORT 4444
+LPORT => 4444
+msf6 exploit(multi/handler) > exploit
+
+[*] Started reverse TCP handler on 192.168.1.100:4444 
+[*] Sending stage (175174 bytes) to 192.168.1.50
+[*] Meterpreter session 1 opened (192.168.1.100:4444 -> 192.168.1.50:49152)
+
+meterpreter > 
+    `, 7000);
+  },
+  mkdir: function() {
+    return simulateCommand(`Directory created.`, 1000);
+  },
+  mv: function() {
+    return simulateCommand(`File moved.`, 1000);
+  },
+  netcat: function() {
+    return simulateCommand(`Netcat 1.10 - Listening on port 4444...`, 2000);
+  },
+  netdiscover: function() {
+    return simulateCommand(`netdiscover 0.7 - ARP scanner starting...`, 2500);
+  },
+  nessus: function() {
+    return simulateCommand(`Nessus Professional 8.15.0 - Scanning target...`, 4000);
+  },
+  netstat: function() {
+    return simulateCommand(`
+Active Internet connections (w/o servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 192.168.1.100:22        192.168.1.10:52996      ESTABLISHED
+tcp        0    272 192.168.1.100:42824     151.101.65.69:443       ESTABLISHED
+    `, 2500);
+  },
+  nexpose: function() {
+    return simulateCommand(`Nexpose 6.6.39 - Initiating security assessment...`, 4000);
+  },
+  nikto: function() {
+    return simulateCommand(`Nikto v2.1.6 starting...`, 3000);
+  },
+  nmap: function() {
+    return simulateCommand(`
+Starting Nmap 7.91 ( https://nmap.org )
+Nmap scan report for target.com (93.184.216.34)
+Host is up (0.0089s latency).
+Not shown: 998 filtered ports
+PORT    STATE SERVICE
+80/tcp  open  http
+443/tcp open  https
+
+Nmap done: 1 IP address (1 host up) scanned in 5.32 seconds
+    `, 5000);
+  },
+  nuclei: function() {
+    return simulateCommand(`Nuclei v2.7.1 - Vulnerability scanner engine starting...`, 3500);
+  },
+  openvas: function() {
+    return simulateCommand(`OpenVAS 21.4.0 - Starting vulnerability scan...`, 4000);
+  },
+  p0f: function() {
+    return simulateCommand(`p0f v3.09b - Passive OS fingerprinting tool initialized...`, 3000);
+  },
+  ping: function() {
+    return simulateCommand(`
+PING google.com (172.217.16.142) 56(84) bytes of data.
+64 bytes from lhr25s10-in-f142.1e100.net (172.217.16.142): icmp_seq=1 ttl=118 time=8.43 ms
+64 bytes from lhr25s10-in-f142.1e100.net (172.217.16.142): icmp_seq=2 ttl=118 time=8.77 ms
+64 bytes from lhr25s10-in-f142.1e100.net (172.217.16.142): icmp_seq=3 ttl=118 time=8.91 ms
+64 bytes from lhr25s10-in-f142.1e100.net (172.217.16.142): icmp_seq=4 ttl=118 time=8.52 ms
+
+--- google.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3005ms
+rtt min/avg/max/mdev = 8.430/8.657/8.910/0.203 ms
+    `, 4000);
+  },
+  powersploit: function() {
+    return simulateCommand(`PowerSploit - Loading PowerShell post-exploitation framework...`, 3000);
+  },
+  proxychains: function() {
+    return simulateCommand(`ProxyChains 4.4.0 - Dynamic proxy server starting...`, 2500);
+  },
+  ps: function() {
+    return simulateCommand(`
+  PID TTY          TIME CMD
+    1 ?        00:00:01 systemd
+    2 ?        00:00:00 kthreadd
+    3 ?        00:00:00 rcu_gp
+    4 ?        00:00:00 rcu_par_gp
+    5 ?        00:00:00 kworker/0:0
+    `, 2500);
+  },
+  pwd: function() {
+    return simulateCommand(`/home/hacker`, 1000);
+  },
+  reaver: function() {
+    return simulateCommand(`Reaver 1.6.6 - WPS brute force attack tool ready...`, 3000);
+  },
+  recon_ng: function() {
+    return simulateCommand(`Recon-ng v5.1.1 - Web Reconnaissance Framework initialized...`, 3000);
+
+  },
+  responder: function() {
+    return simulateCommand(`Responder 3.0.6.0 - Waiting for NetBIOS/LLMNR requests...`, 3000);
+  },
+  rm: function() {
+    return simulateCommand(`File removed.`, 1000);
+  },
+  routersploit: function() {
+    return simulateCommand(`RouterSploit 3.4.0 - Framework for exploiting embedded devices ready...`, 3500);
+  },
+  seclists: function() {
+    return simulateCommand(`SecLists - Multiple security-related lists loaded...`, 2500);
+  },
+  set: function() {
+    return simulateCommand(`Social-Engineer Toolkit (SET) v8.0.3 - Choose your attack vector:`, 2500);
+  },
+  setoolkit: function() {
+    return simulateCommand(`The Social-Engineer Toolkit (SET) v8.0.3 - Select attack vector:`, 3000);
+  },
+  sherlock: function() {
+    return simulateCommand(`Sherlock - Social media username checker starting...`, 3000);
+  },
+  shodan: function() {
+    return simulateCommand(`Shodan CLI 1.25.0 - Searching for exposed devices...`, 4000);
+  },
+  snort: function() {
+    return simulateCommand(`Snort 3.1.1.0 - Starting intrusion detection...`, 3000);
+  },
+  social_mapper: function() {
+    return simulateCommand(`Social Mapper - Correlating social media profiles across platforms...`, 4000);
+  },
+  spiderfoot: function() {
+    return simulateCommand(`SpiderFoot 3.5 - Open source intelligence automation tool initialized...`, 3500);
+  },
+  sqlmap: function() {
+    return simulateCommand(`
+sqlmap identified the following injection point(s) with a total of 86 HTTP(s) requests:
+---
+Parameter: id (GET)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: id=1 AND 5650=5650
+
+    Type: time-based blind
+    Title: MySQL >= 5.0.12 AND time-based blind (query SLEEP)
+    Payload: id=1 AND (SELECT 4751 FROM (SELECT(SLEEP(5)))nJuj)
+
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 3 columns
+    Payload: id=1 UNION ALL SELECT NULL,NULL,CONCAT(0x7178706a71,0x4d4f4b4f4f4c694e6d71664e6d7879434e32560x7162717171)-- -
+---
+    `, 6000);
+  },
+  sqlninja: function() {
+    return simulateCommand(`SQLninja 0.2.999-alpha1 - SQL Server exploitation tool ready...`, 3000);
+  },
+  sslstrip: function() {
+    return simulateCommand(`sslstrip 0.9 - HTTPS stripping attack in progress...`, 3000);
+  },
+  subfinder: function() {
+    return simulateCommand(`SubFinder v2.5.1 - Subdomain discovery tool initiated...`, 3500);
+  },
+  top: function() {
+    return simulateCommand(`
+top - 14:28:48 up  1:15,  1 user,  load average: 0.52, 0.58, 0.59
+Tasks: 266 total,   1 running, 265 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  2.6 us,  1.0 sy,  0.0 ni, 96.3 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :  15919.1 total,   7780.8 free,   3525.2 used,   4613.1 buff/cache
+MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.  11508.4 avail Mem 
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+ 1234 root      20   0  743616  49840  38056 S   2.0   0.3   0:00.61 systemd
+ 5678 hacker    20   0  846944  53616  38368 S   1.3   0.3   0:00.42 bash
+    `, 3000);
+  },
+  touch: function() {
+    return simulateCommand(`File created.`, 1000);
+  },
+  traceroute: function() {
+    return simulateCommand(`
+traceroute to google.com (172.217.16.142), 30 hops max, 60 byte packets
+ 1  _gateway (192.168.1.1)  0.201 ms  0.174 ms  0.162 ms
+ 2  10.0.0.1 (10.0.0.1)  1.630 ms  1.619 ms  1.607 ms
+ 3  72.14.215.85 (72.14.215.85)  2.169 ms  2.158 ms  2.146 ms
+ 4  108.170.252.209 (108.170.252.209)  2.303 ms  2.292 ms  2.280 ms
+ 5  172.217.16.142 (172.217.16.142)  8.720 ms  8.709 ms  8.697 ms
+    `, 5000);
+  },
+  uname: function() {
+    return simulateCommand(`Linux cybersim 5.10.0-generic #1 SMP Debian 5.10.28-1 (2021-04-09) x86_64 GNU/Linux`, 1000);
+  },
+  volatility: function() {
+    return simulateCommand(`Volatility 2.6 - Memory forensics framework loaded...`, 3000);
+  },
+  wafw00f: function() {
+    return simulateCommand(`WAFW00F 2.1.0 - Web Application Firewall Detection Tool starting...`, 3500);
+  },
+  webscarab: function() {
+    return simulateCommand(`OWASP WebScarab NG - Web application testing tool initialized...`, 3000);
+  },
+  weevely: function() {
+    return simulateCommand(`Weevely 4.0.1 - Web shell framework ready...`, 3000);
+  },
+  wfuzz: function() {
+    return simulateCommand(`Wfuzz 3.1.0 - Web application fuzzer initialized...`, 3000);
+  },
+  whatweb: function() {
+    return simulateCommand(`WhatWeb 0.5.5 - Next generation web scanner starting...`, 3500);
+  },
+  whoami: function() {
+    return simulateCommand(`root`, 1000);
+  },
+  wireshark: function() {
+    return simulateCommand(`Wireshark 3.4.3 (Qt5.12.8) running on Linux.`, 3000);
+  },
+  wpscan: function() {
+    return simulateCommand(`WPScan 3.8.20 - WordPress Security Scanner starting...`, 3500);
+  },
+  xsser: function() {
+    return simulateCommand(`XSSer 1.7.4 - Cross Site Scripting framework loaded...`, 3000);
+  },
+  zaproxy: function() {
+    return simulateCommand(`OWASP ZAP 2.10.0 - Automated security testing in progress...`, 3500);
+  },
+  exit: function() {
+    return new Promise((resolve) => {
+      const thankYouScreen = document.createElement('div');
+      thankYouScreen.id = 'thank-you-screen';
+      thankYouScreen.innerHTML = `
+        <center><h1>Obrigado por usar o Hacker Simulator!</h1></center>
+        <p>Esperamos que tenha desfrutado desta experiência de simulação hacker.</p>
+        <p>Lembre-se, use seus conhecimentos de forma ética e responsável.</p>
+        <p>Aperte a tecla <strong>F5</strong> para retornar ao inicio!</p>
+	<p><strong>Desenvolvido e criado por: <font color="#FF0000">Fabio Maran</strong></font> </p>
+      `;
+      document.body.appendChild(thankYouScreen);
+
+      setTimeout(() => {
+        thankYouScreen.style.opacity = '1';
+      }, 100);
+
+      setTimeout(() => {
+        resolve("Sessão encerrada. Obrigado por usar o Hacker simulator!");
+      }, 5000);
+    });
+  },
+  ajuda: function() {
+    const commandDescriptions = {
+      aircrack_ng: "Uma suíte completa para avaliar a segurança de redes Wi-Fi. Inclui ferramentas para monitoramento, ataque, teste e quebra de senhas.",
+      airgeddon: "Framework para auditoria de segurança wireless. Automatiza ataques complexos e fornece uma interface amigável.",
+      auto_hacker: "Inicia uma simulação de hacking automático, executando comandos aleatórios até que uma tecla seja pressionada.",
+      beef: "Framework de exploração de navegador. Permite o teste de penetração focado no cliente através do navegador web.",
+      burpsuite: "Plataforma integrada para realizar testes de segurança de aplicativos web. Inclui várias ferramentas para mapeamento, análise e exploração.",
+      cat: "Exibe o conteúdo de arquivos. Útil para visualizar rapidamente informações em arquivos de texto.",
+      cd: "Muda o diretório atual. Essencial para navegar pela estrutura de arquivos do sistema.",
+      cewl: "Gerador de listas de palavras personalizadas. Rastreia um site para criar uma lista de palavras para uso em tentativas de quebra de senha.",
+      chmod: "Modifica as permissões de arquivos e diretórios. Crucial para gerenciar o acesso a recursos do sistema.",
+      chown: "Altera o proprietário de arquivos e diretórios. Importante para gerenciamento de permissões e segurança.",
+      cp: "Copia arquivos e diretórios. Útil para backup e manipulação de dados.",
+      crackmapexec: "Ferramenta versátil para pós-exploração e movimentação lateral em redes Windows/Active Directory.",
+      crunch: "Gerador de wordlist altamente customizável. Cria listas de palavras baseadas em critérios específicos.",
+      date: "Exibe ou define a data e hora do sistema. Útil para sincronização e logging.",
+      df: "Mostra o uso do espaço em disco. Essencial para monitoramento de recursos do sistema.",
+      dirb: "Scanner de conteúdo web. Procura por diretórios e arquivos existentes em servidores web.",
+      dmitry: "Ferramenta de coleta de informações. Realiza buscas abrangentes sobre alvos específicos.",
+      dnsenum: "Enumerador de informações DNS. Coleta dados valiosos sobre domínios e redes.",
+      dnsrecon: "Ferramenta de reconhecimento DNS. Enumera registros DNS e mapeia redes.",
+      echo: "Exibe uma linha de texto. Útil para testes simples e scripts.",
+      enum4linux: "Ferramenta para enumeração de informações em sistemas Windows e Samba.",
+      ettercap: "Sniffer/interceptor/logger para LANs com switch. Suporta dissecção ativa e passiva de protocolos.",
+      fierce: "Scanner de DNS. Localiza todos os endereços IP e hostnames associados a um domínio.",
+      find: "Procura por arquivos no sistema de arquivos. Extremamente versátil para localização de dados.",
+      free: "Exibe a quantidade de memória livre e usada no sistema. Útil para diagnóstico de desempenho.",
+      gobuster: "Ferramenta de força bruta de URI e DNS. Descobre diretórios e arquivos em servidores web.",
+      grep: "Procura por padrões em arquivos. Essencial para análise de logs e busca de informações específicas.",
+      hashcat: "Ferramenta avançada de recuperação de senhas. Suporta diversos tipos de hash e métodos de ataque.",
+      hping3: "Gerador/analisador de pacotes TCP/IP. Útil para testes de firewall e análise de rede.",
+      hydra: "Ferramenta de força bruta para login em vários protocolos. Muito eficaz para testar a força de senhas.",
+      ifconfig: "Configura ou exibe informações sobre interfaces de rede. Essencial para configuração e diagnóstico de rede.",
+      iptables: "Administra as regras de firewall do kernel Linux. Fundamental para segurança de rede.",
+      john: "Ferramenta de quebra de senhas. Suporta diversos formatos de hash e métodos de ataque.",
+      kismet: "Sniffer e detector de redes wireless. Identifica e localiza pontos de acesso.",
+      legion: "Framework semi-automático de teste de penetração. Integra várias ferramentas para reconhecimento e exploração.",
+      ls: "Lista o conteúdo de diretórios. Básico, mas essencial para navegação no sistema de arquivos.",
+      lynis: "Ferramenta de auditoria de segurança para sistemas Unix/Linux. Realiza verificações extensivas de segurança e conformidade.",
+      maltego: "Ferramenta de mineração de dados e visualização de links. Útil para investigações e coleta de inteligência.",
+      masscan: "Scanner de portas TCP de alta velocidade. Capaz de escanear a Internet inteira em menos de 6 minutos.",
+      medusa: "Ferramenta de força bruta para login paralelo. Suporta diversos protocolos e é altamente customizável.",
+      metasploit: "Framework avançado de teste de penetração. Contém uma vasta coleção de exploits e ferramentas de pós-exploração.",
+      mkdir: "Cria novos diretórios. Básico, mas essencial para organização de arquivos.",
+      mv: "Move ou renomeia arquivos e diretórios. Útil para organização e gerenciamento de dados.",
+      netcat: "Utilitário de rede versátil. Pode criar conexões TCP/UDP, atuar como backdoor, e muito mais.",
+      netdiscover: "Scanner ARP ativo/passivo. Útil para descoberta de hosts em redes locais.",
+      nessus: "Scanner de vulnerabilidades abrangente. Identifica falhas de segurança em sistemas e redes.",
+      netstat: "Exibe conexões de rede, tabelas de roteamento e estatísticas de interface. Essencial para diagnóstico de rede.",
+      nexpose: "Scanner de vulnerabilidades e ferramenta de gerenciamento de riscos. Oferece análise detalhada e relatórios personalizáveis.",
+      nikto: "Scanner de vulnerabilidades web. Verifica servidores web em busca de problemas de segurança.",
+      nmap: "Ferramenta de descoberta de rede e auditoria de segurança. Essencial para mapeamento e análise de redes.",
+      nuclei: "Scanner de vulnerabilidades baseado em templates. Rápido e personalizável para diversos cenários de segurança.",
+      openvas: "Framework de gerenciamento de vulnerabilidades. Realiza varreduras abrangentes e fornece relatórios detalhados.",
+      p0f: "Ferramenta de fingerprinting passivo de SO. Identifica sistemas operacionais baseado no tráfego de rede.",
+      ping: "Envia pacotes ICMP para testar conectividade. Básico, mas fundamental para diagnóstico de rede.",
+      powersploit: "Coleção de módulos PowerShell para todas as fases de um teste de penetração.",
+      proxychains: "Força aplicativos a usar proxy SOCKS4a/5 ou HTTP(S). Útil para anonimização e contorno de restrições.",
+      ps: "Exibe os processos em execução. Essencial para monitoramento e gerenciamento de sistema.",
+      pwd: "Exibe o diretório de trabalho atual. Básico, mas útil para orientação no sistema de arquivos.",
+      reaver: "Ferramenta de ataque a WPS (Wi-Fi Protected Setup). Explora vulnerabilidades em roteadores wireless.",
+      recon_ng: "Framework de reconhecimento web. Automatiza o processo de coleta de informações.",
+      responder: "Ferramenta de envenenamento LLMNR, NBT-NS e MDNS. Útil para ataques de homem-no-meio em redes locais.",
+      rm: "Remove arquivos ou diretórios. Use com cautela, pois a remoção é permanente.",
+      routersploit: "Framework de exploração para dispositivos embarcados. Focado em roteadores e IoT.",
+      seclists: "Coleção de múltiplas listas relacionadas à segurança. Inclui senhas, URLs, padrões de fuzzing, etc.",
+      set: "Social-Engineer Toolkit. Conjunto de ferramentas para ataques de engenharia social.",
+      setoolkit: "Alias para o Social-Engineer Toolkit (SET).",
+      sherlock: "Ferramenta para encontrar contas de mídia social por nome de usuário. Útil para OSINT.",
+      shodan: "Motor de busca para dispositivos conectados à Internet. Encontra sistemas vulneráveis e coleta informações.",
+      snort: "Sistema de detecção e prevenção de intrusões (IDS/IPS). Monitora o tráfego de rede em tempo real.",
+      social_mapper: "Ferramenta de OSINT para correlacionar perfis em redes sociais. Mapeia a presença online de alvos.",
+      spiderfoot: "Ferramenta de automação de OSINT. Coleta e correlaciona dados de diversas fontes.",
+      sqlmap: "Ferramenta automática de detecção e exploração de injeção SQL. Poderosa para testar segurança de bancos de dados.",
+      sqlninja: "Ferramenta de exploração de SQL injection focada em Microsoft SQL Server.",
+      sslstrip: "Ferramenta para ataques MITM em conexões HTTPS. Remove a camada de criptografia SSL/TLS.",
+      subfinder: "Ferramenta de descoberta de subdomínios. Usa diversas fontes para enumerar subdomínios de um domínio alvo.",
+      top: "Exibe os processos do sistema em tempo real. Útil para monitoramento de desempenho.",
+      touch: "Cria um arquivo vazio ou atualiza o timestamp de um existente. Útil para testes e scripts.",
+      traceroute: "Mostra a rota que os pacotes tomam até um destino. Útil para diagnóstico de problemas de rede.",
+      uname: "Exibe informações sobre o sistema operacional. Útil para identificação rápida do ambiente.",
+      volatility: "Framework avançado de análise de memória forense. Extrai informações valiosas de dumps de memória.",
+      wafw00f: "Ferramenta para identificar e fingerprint Web Application Firewalls (WAF).",
+      webscarab: "Ferramenta da OWASP para análise e teste de aplicações web. Intercepta e modifica requisições HTTP/HTTPS.",
+      weevely: "Gerador de backdoor PHP e framework de pós-exploração.",
+      wfuzz: "Ferramenta de fuzzing web. Útil para descoberta e teste de vulnerabilidades em aplicações web.",
+      whatweb: "Scanner de fingerprint de próxima geração. Identifica tecnologias usadas em websites.",
+      whoami: "Exibe o nome do usuário atual. Útil para verificar permissões e identidade.",
+      wireshark: "Analisador de protocolo de rede. Poderoso para captura e análise detalhada de pacotes.",
+      wpscan: "Scanner de segurança para WordPress. Identifica vulnerabilidades em sites e plugins WordPress.",
+      xsser: "Framework automatizado para detectar, explorar e reportar vulnerabilidades XSS.",
+      zaproxy: "Scanner e proxy de segurança para aplicações web. Ferramenta abrangente para teste de segurança.",
+      exit: "Encerra a sessão do Hacker Simulator."
+    };
+
+    const commandList = Object.keys(commandDescriptions).sort();
+    let helpText = `
+      <ul class="command-list">
+    `;
+    for (const cmd of commandList) {
+      helpText += `<li><span class="command-name">${cmd}</span> - ${commandDescriptions[cmd]}</li>`;
+    }
+    helpText += `
+      </ul>
+    `;
+    return helpText;
+  },
+};
+
+let autoHackerInterval;
+
+function startAutoHacker() {
+  const hackerCodes = [
+    "sudo ./exploit.sh",
+    "nmap -sV -p- 192.168.1.1",
+    "ssh root@10.0.0.1 -p 2222",
+    "curl -s https://api.example.com/v1/users",
+    "for i in {1..1000}; do echo $i; done",
+    "ping -c 4 8.8.8.8",
+    "grep -r \"password\" /var/log/*",
+    "sqlmap -u \"http://example.com/login.php\" --dbs",
+    "python3 -c \"import os; os.system('whoami')\"",
+    "docker run --rm -it kalilinux/kali-rolling",
+    "git clone https://github.com/secret/repo.git",
+    "openssl enc -aes-256-cbc -in secret.txt -out encrypted.txt",
+    "echo 'Hello, World!' | base64",
+    "dig +short google.com",
+    "tcpdump -i eth0 -n tcp port 80",
+  ];
+
+  const responseElement = document.createElement('div');
+  responseElement.classList.add('response');
+  terminal.insertBefore(responseElement, input.parentElement);
+
+  autoHackerInterval = setInterval(async () => {
+    const randomCode = hackerCodes[Math.floor(Math.random() * hackerCodes.length)];
+    await simulateTyping(randomCode, responseElement);
+    responseElement.innerHTML += '<br>';
+    terminal.scrollTop = terminal.scrollHeight;
+  }, 1000);
+}
+
+const simulateTyping = (text, element) => {
+  return new Promise((resolve) => {
+    let i = 0;
+    element.classList.add('loading');
+    const interval = setInterval(() => {
+      if (text[i] === '<') {
+        const closingTag = text.indexOf('>', i);
+        element.innerHTML += text.substring(i, closingTag + 1);
+        i = closingTag + 1;
+      } else {
+        element.innerHTML += text[i];
+        i++;
+      }
+      terminal.scrollTop = terminal.scrollHeight;
+      if (i === text.length) {
+        clearInterval(interval);
+        element.classList.remove('loading');
+        resolve();
+      }
+    }, 10);
+  });
+};
+
+input.addEventListener('input', (e) => {
+  typedText.textContent = e.target.value;
+});
+
+input.addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') {
+    const command = input.value.toLowerCase().trim();
+    input.value = '';
+    typedText.textContent = '';
+
+    const responseElement = document.createElement('div');
+    responseElement.classList.add('response');
+    terminal.insertBefore(responseElement, input.parentElement);
+
+    await simulateTyping(`$ ${command}`, responseElement);
+
+    if (command === 'exit') {
+      const exitResponse = await commands.exit();
+      const exitElement = document.createElement('div');
+      exitElement.classList.add('response');
+      terminal.insertBefore(exitElement, input.parentElement);
+      await simulateTyping(exitResponse, exitElement);
+    } else if (command === 'ajuda') {
+      const cmdResponseElement = document.createElement('div');
+      cmdResponseElement.classList.add('response');
+      terminal.insertBefore(cmdResponseElement, input.parentElement);
+      cmdResponseElement.innerHTML = commands[command]();
+    } else if (commands[command]) {
+      const cmdResponseElement = document.createElement('div');
+      cmdResponseElement.classList.add('response');
+      terminal.insertBefore(cmdResponseElement, input.parentElement);
+      if (typeof commands[command] === 'function') {
+        const result = await commands[command]();
+        await simulateTyping(result, cmdResponseElement);
+        if (command === 'auto_hacker') {
+          startAutoHacker();
+        }
+      } else {
+        await simulateTyping(commands[command], cmdResponseElement);
+      }
+    } else {
+      const errorElement = document.createElement('div');
+      errorElement.classList.add('response');
+      terminal.insertBefore(errorElement, input.parentElement);
+      await simulateTyping("Comando não reconhecido. Digite 'ajuda' para ver a lista de comandos.", errorElement);
+    }
+
+    terminal.scrollTop = terminal.scrollHeight;
+  } else if (autoHackerInterval) {
+    clearInterval(autoHackerInterval);
+    autoHackerInterval = null;
+    const stopElement = document.createElement('div');
+    stopElement.classList.add('response');
+    terminal.insertBefore(stopElement, input.parentElement);
+    await simulateTyping("Auto Hacker interrompido.", stopElement);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+});
+
+document.addEventListener('click', () => {
+  input.focus();
+});
+  
+</script>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Bloquear cópia de conteúdo</title>
+  
+<script>
+function mensagem(){
+    alert('Conteudo bloqueado!');
+    return false;
+}
+  
+function bloquearCopia(Event){
+    var Event = Event ? Event : window.event;
+    var tecla = (Event.keyCode) ? Event.keyCode : Event.which;
+    if(tecla == 17){
+        mensagem();
+    }
+}
+</script>
+  
+</head>
+  
+<body>
+
+<br />
+</body>
+</html>
+  
+<script>
+    document.onkeypress = bloquearCopia;
+    document.onkeydown = bloquearCopia;
+    document.oncontextmenu = mensagem;
+</script>
+</html>
